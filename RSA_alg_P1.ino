@@ -700,6 +700,7 @@ void eventScreen(uint8_t i, uint16_t x, uint16_t y){
             }//IF
      
       break; //CASE 7
+      
 //GAME SCREEN______________________________________________________________________________________________________
       case 8: 
        if( (x<=20 && x>=0) && (y<=20 && y>=0) ){
@@ -711,10 +712,7 @@ void eventScreen(uint8_t i, uint16_t x, uint16_t y){
             if (client.connected()) client.disconnect();
             
         }//IF
-        
-        //MQTT___________________________________________________________________________
-            
-
+     
             tpc1[5] = segno;
             tpc2[5] = (segno=='O')?'X':'O';
 
@@ -753,7 +751,6 @@ void eventScreen(uint8_t i, uint16_t x, uint16_t y){
                       }//IF
                   }//IF
 
-          
         break; //  CASE 8
         
        //WIN SCREEN_________________________________________________________________________________________________
