@@ -713,17 +713,17 @@ void eventScreen(uint8_t i, uint16_t x, uint16_t y){
             
         }//IF
      
-            tpc1[5] = segno;
-            tpc2[5] = (segno=='O')?'X':'O';
+            tpc1[5] = segno;                 //set topic for publishing my moves with my sign
+            tpc2[5] = (segno=='O')?'X':'O';  //set topic for subscribing to opponent moves, with opponent sign
 
-            if (!client.connected()) reconnectMqtt(tpc2);//mi sottoscrivo al topic avversario
+            if (!client.connected()) reconnectMqtt(tpc2); //subscription to opponent topic
             else subscribeMessage(tpc2);
             client.loop();
 
-            opponentMoves();
+            opponentMoves();                //method for receiveng opponent moves
 
-            if(turn)
-              for(int i=0; i<3; ++i)
+            if(turn)                        //if my turn == true, this boolean variable is used to synchronize the game
+              for(int i=0; i<3; ++i)        //if my turn is true the oppoent is false and viceversa
                 for(int j=0; j<3; ++j)
                   if( ((matrix[i][j] != 'X') && (matrix[i][j] != 'O')) && ( x<=((j+1)*50)+95 && x>=(j*50)+95 && y<=((i+1)*50)+60 && y>=(i*50)+60 ) ){
                       String msgS = String(i+1) + String(j+1);
@@ -779,8 +779,8 @@ void opponentMoves(){
       if(msgIn != ""){
          if(rsa) msgIn = decrypte(msgIn);
        
-         r = uint8_t(msgIn[0])-49;
-         c = uint8_t(msgIn[1])-49;
+         r = uint8_t(msgIn[0])-49;        //receive ASCII value of {1,2,3}, brings them as unsigned integer
+         c = uint8_t(msgIn[1])-49;        //from 0 to 2, for using suitable indexes for char matrix.
   
          if(matrix[r][c] != 'X' && (matrix[r][c] != 'O') && (matrix[r][c] == '-')){
             matrix[r][c] = (segno=='O')?'X':'O';
