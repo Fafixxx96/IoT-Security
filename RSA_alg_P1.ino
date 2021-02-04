@@ -7,21 +7,29 @@
 
 #define CALIBRATION_FILE "/TouchCalData3"
 #define REPEAT_CAL false
-#define K 75 //resonable value
+#define K 75                                              //resonable value od upperbound for crivello Genration
 
-const char PASSWORD[] = "Capparelli96"; //same password for all networks
-const char mqttBROKER[] = "192.168.1.201"; //ip of raspberry .201
-const char mqttCLIENT[] = "player1";
+const char PASSWORD[] = "Capparelli96";                   //same password for all networks
+const char mqttBROKER[] = "192.168.1.201";                //ip of raspberry broker
+const char mqttCLIENT[] = "player1";                      //id of client (player2 for opponent)
 
-volatile uint32_t N, O, d, c1, c2, privateKey[2], publicKey_1[2], publicKey_2[2];
-volatile uint8_t p, q, e, c, crivello_set[K], caso, nNet;
-volatile boolean flag = false, turn, rsa = false, sent = false, received = false, b1 = false;
-volatile char segno = '-', matrix[3][3];
+volatile uint32_t N, O, d, c1, c2, privateKey[2],         //variables for implementing the key generation
+                  publicKey_1[2], publicKey_2[2]; 
 
-String ssidNet[2], msgIn;
+volatile uint8_t p, q, e, c, crivello_set[K], caso, nNet; //variables for implementing the key generation, the vector of crivello
+                                                          //caso is used to determine the screen that has to be displayed
+                                                          //nNet is the number of networks.
 
-WiFiClient espClient; 
-PubSubClient client(espClient);
+volatile boolean flag = false, turn, rsa = false,         //some helpfull boolean variables
+                 sent = false, received = false, 
+                 b1 = false;                   
+
+volatile char segno = '-', matrix[3][3];                  //sengo is the char that stand for X or O, Matrix is used as game data structure                                                   
+
+String ssidNet[2], msgIn;                                 //vector of networks ssid, msgIn in used in the callback mqtt, when we receive a messagen from the broker
+
+WiFiClient espClient;                       
+PubSubClient client(espClient);                           //MQTT client
 
 TFT_eSPI tft = TFT_eSPI();
 
@@ -30,8 +38,13 @@ uint8_t contain(volatile uint8_t* vet, uint32_t n, uint8_t elem){
      if(vet[i] == (elem))
       return 1;
   return 0;
-}
+}//contain
 
+//CRIVELLO
+/*
+  used for building the crivello of Erastotene, ù
+  for determining the prime numbers inside the range (1, k)
+*/
 uint8_t* crivello(){
   uint8_t* primes = (uint8_t*) malloc(1 * sizeof(uint8_t));;
   
@@ -54,8 +67,13 @@ uint8_t* crivello(){
      }
      
    return primes;
-}
+}//crivello
 
+//ESTRAI
+/*
+  extract and determine the parameters useful for 
+  RSA algorithm and Key generator
+*/
 void estrai(){
   
   uint8_t* primes = crivello();
@@ -72,7 +90,7 @@ void estrai(){
 
   e = 1;
   c = 0;
-  for (uint32_t i = 2; i <= O; i++){
+  for (uint32_t i = 2; i <= O; i++){        //searching number e, the lowest MCD (e, N)
        uint32_t* divO = divisori(O, i); 
        uint32_t* divE = divisori(i, i);
 
@@ -89,22 +107,24 @@ void estrai(){
   }
   
   d = 0;
-  for (uint32_t i = 2; i <= O; i++){
+  for (uint32_t i = 2; i <= O; i++){      // find the lowest d number such that   (e * d ) mod O = 1
     d = i;
     if (((d*e)%O) == 1) break;
   }
-}
+}//ESTRAI
+
 
 String publicKeyToString(){
   return String(e) + "," + String(N);
-}
+}//publicKeyToString
+
 String publicKey_2_ToString(){
   return String(publicKey_2[0]) + "," + String(publicKey_2[1]);
-}
+}//publicKey_2_ToString
 
 String privateKeyToString(){
   return String(d) + "," + String(N);
-}
+}//privateKeyToString
 
 void resetKeys(){
    publicKey_2[0] = 0;
@@ -112,8 +132,12 @@ void resetKeys(){
    
    privateKey[0] = 0; privateKey[1] = 0;
    publicKey_1[0] = 0; publicKey_1[1] = 0;
-}
+}//resetKeys
 
+//DIVISORI
+/*
+  finds the divisors on a number a giving a bound "limit"
+*/
 uint32_t*  divisori (uint32_t a, uint32_t limit){
     uint32_t* divis = 0;
     uint32_t cn = 1;
@@ -128,8 +152,13 @@ uint32_t*  divisori (uint32_t a, uint32_t limit){
      else c2 = cn-1;
      
      return divis;
-}
+}//divisori
 
+//ECRYPTE
+/* 
+   uses big integer, it essentialli encrypte an ACII code in the case of sign 
+   or a position in the matrix of char in the case of game
+*/
 String encrypte(uint8_t m){
   
     BigInteger N1 = BigInteger(publicKey_2[1]);
