@@ -63,9 +63,7 @@ uint8_t* crivello(){
       c++;
       primes = (primes != 0)?(uint8_t*) realloc(primes, c * sizeof(uint8_t)):primes = (uint8_t*) malloc(c * sizeof(uint8_t));
       primes[c-1] = crivello_set[i];
-      
-     }
-     
+     } 
    return primes;
 }//crivello
 
@@ -80,7 +78,6 @@ void estrai(){
   
   p = primes[uint8_t(random(5, c-1))];
   q = primes[uint8_t(random(10, c-1))];
-
   while ( q == p ) q = primes[uint8_t(random(10, c))];
   
   free(primes);
@@ -93,7 +90,6 @@ void estrai(){
   for (uint32_t i = 2; i <= O; i++){        //searching number e, the lowest MCD (e, N)
        uint32_t* divO = divisori(O, i); 
        uint32_t* divE = divisori(i, i);
-
        for(uint32_t k = 0; k<c1; k ++)
            for(uint32_t j = 0; j<c2; j ++)
                if(divO[k] == divE[j])
