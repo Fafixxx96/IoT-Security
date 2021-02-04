@@ -577,55 +577,50 @@ void eventScreen(uint8_t i, uint16_t x, uint16_t y){
             resetKeys();
             if (client.connected()) client.disconnect();
        }//IF
-       
-       
-        //MQTT_____________________________________________________________________________________________________________________
             
-                if (!client.connected()) reconnectMqtt("key2");
-                else client.subscribe("key2");
-                client.loop(); 
+        if (!client.connected()) reconnectMqtt("key2");   //key1 for player2
+        else client.subscribe("key2");                    //key1 for player2
+        client.loop(); 
 
-                 if( (x<=210 && x>=90) && (y<=180 && y>=140) ){
-                     privateKey[0] = d; privateKey[1] = N;
-                     publicKey_1[0] = e; publicKey_1[1] = N;
-                     String msgS = publicKeyToString();
-                     char msg[msgS.length()+1];
-                     msgS.toCharArray(msg, msgS.length()+1); 
-                     publishMessage("key1", msg);
-                     sent = true;
-                     caso = 6;
-                  }//IF
+        if( (x<=210 && x>=90) && (y<=180 && y>=140) ){  //PUBLISH, push send key button
+             privateKey[0] = d; privateKey[1] = N;
+             publicKey_1[0] = e; publicKey_1[1] = N;
+             String msgS = publicKeyToString();
+             char msg[msgS.length()+1];
+             msgS.toCharArray(msg, msgS.length()+1); 
+             publishMessage("key1", msg);               //key2 for player2
+             sent = true;
+             caso = 6;        
+       }//IF
                   
-             
-                if(publicKey_2[0] == 0 && publicKey_2[1] == 0 && msgIn != "") {
-                    uint8_t v=0;
-                    for (uint8_t i = 0; i<msgIn.length(); i++)
-                      if(msgIn[i] == ',') v = i;
+        if(publicKey_2[0] == 0 && publicKey_2[1] == 0 && msgIn != "") {  //RECEIVING, wait the change of msgIn
+           uint8_t v=0;
+           for (uint8_t i = 0; i<msgIn.length(); i++)
+                 if(msgIn[i] == ',') v = i;
                     
-                    publicKey_2[0] = msgIn.substring(0, v).toInt();
-                    publicKey_2[1] = msgIn.substring(v+1, msgIn.length()).toInt();
-                    received = true;
-                    setText("Received: (e,N)=(" + String(publicKey_2[0]) + ", " + String(publicKey_2[1]) + ")", 0, 180, 2, TFT_OLIVE);
-                    msgIn = "";
-                    caso = 6;    
-                }//IF
+            publicKey_2[0] = msgIn.substring(0, v).toInt();
+            publicKey_2[1] = msgIn.substring(v+1, msgIn.length()).toInt();
+            received = true;
+            setText("Received: (e,N)=(" + String(publicKey_2[0]) + ", " + String(publicKey_2[1]) + ")", 0, 180, 2, TFT_OLIVE);
+            msgIn = "";
+            caso = 6;    
+        }//IF
               
+        if(sent && received) {
+            setBtn("PLAY", 90, 200, 120, 30, 1, TFT_DARKGREY, TFT_WHITE, TFT_WHITE);
+            b1 = true;
+            sent = false;
+            received = false;
+          }//IF
               
-              if(sent && received) {
-                setBtn("PLAY", 90, 200, 120, 30, 1, TFT_DARKGREY, TFT_WHITE, TFT_WHITE);
-                b1 = true;
-                sent = false;
-                received = false;
-              }//IF
-              
-              if ( b1 && (x<=210 && x>=90) && (y<=230 && y>=200)){
-                  client.unsubscribe("key1");
-                  client.disconnect();
-                  signScreen();
-                  msgIn = "";
-                  b1 = false;
-                  caso = 7;
-                }//IF
+        if ( b1 && (x<=210 && x>=90) && (y<=230 && y>=200)){
+            client.unsubscribe("key1");
+            client.disconnect();
+            signScreen();
+            msgIn = "";
+            b1 = false;
+            caso = 7;
+         }//IF
                 
        break; // CASE 6
               
