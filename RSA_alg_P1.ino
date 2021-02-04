@@ -172,7 +172,6 @@ String encrypte(uint8_t m){
    converts it in the corresponding ASCII code for sign
    or position in the matrix for game
 */
-
 String decrypte(String enc){
     BigInteger N1 = BigInteger(privateKey[1]);
     BigInteger d1 = BigInteger(privateKey[0]);
@@ -182,7 +181,7 @@ String decrypte(String enc){
     BigInteger dec = (enc1^d1)%N1;
     
     return convert(dec);
-}
+}//decrypte
 
 string convert2(String m){
   string s = "";
