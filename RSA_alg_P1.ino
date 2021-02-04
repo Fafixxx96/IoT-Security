@@ -166,7 +166,12 @@ String encrypte(uint8_t m){
     
     return convert(enc);
 }
-
+//DECRYPTE
+/* 
+   uses big integer, it essentiallY Dencryptes a string and
+   converts it in the corresponding ASCII code for sign
+   or position in the matrix for game
+*/
 
 String decrypte(String enc){
     BigInteger N1 = BigInteger(privateKey[1]);
