@@ -634,16 +634,13 @@ void eventScreen(uint8_t i, uint16_t x, uint16_t y){
             if (client.connected()) client.disconnect();
            
         }//IF
-        
-       
-          //MQTT___________________________________________________________________
-           
-            if (!client.connected()) reconnectMqtt("segno");
+          
+            if (!client.connected()) reconnectMqtt("segno"); //SUBSCRIPTION
             else client.subscribe("segno");
             client.loop(); 
             
-            if(segno == '-' && msgIn == "O") {
-              segno = 'X';
+            if(segno == '-' && msgIn == "O") {  //IF THE OPPONENT CHOOSES "O"
+              segno = 'X';                      //set "X"
               msgIn = "";
               caso = 8;
               turn = false; //opponent turn
@@ -652,8 +649,8 @@ void eventScreen(uint8_t i, uint16_t x, uint16_t y){
               client.disconnect();
             }//IF
             
-            if(segno == '-' && msgIn == "X" ) {
-              segno = 'O';
+            if(segno == '-' && msgIn == "X" ) { //IF THE OPPONENT CHOOSES "X"
+              segno = 'O';                      //set "O"
               msgIn = "";
               caso = 8;
               turn = false; //opponent turn
@@ -662,21 +659,18 @@ void eventScreen(uint8_t i, uint16_t x, uint16_t y){
               client.disconnect();
             }//IF
 
-            if(segno == '-' && msgIn != "" && rsa){
-              Serial.println("msgIn: " + msgIn);
-              msgIn = char(decrypte(msgIn).toInt());
+            if(segno == '-' && msgIn != "" && rsa){  //if rsa == true DECRYPTE msgIn,  
+              msgIn = char(decrypte(msgIn).toInt()); //it is used the ASCII value of X = 88 and O = 79
             }//IF
             
-            if(segno == '-' && (x<=170 && x>=120) && (y<=140 && y>=100)){
-              
-              if(rsa) {
-                String encS = encrypte('O');
-                //Serial.println("segno: " + encS);
+            if(segno == '-' && (x<=170 && x>=120) && (y<=140 && y>=100)){ //PUBLISH "O"
+              if(rsa) {                                                   //IF rsa encrypte 
+                String encS = encrypte('O'); 
                 char encC[encS.length()+1];
                 encS.toCharArray(encC, encS.length()+1);
                 publishMessage("segno", encC);
               }//IF
-              else publishMessage("segno", "O"); //ELSE
+              else publishMessage("segno", "O"); //ELSE                   //if !RSA do not encrypte
               
               msgIn="";
               segno = 'O';
@@ -687,15 +681,14 @@ void eventScreen(uint8_t i, uint16_t x, uint16_t y){
               client.disconnect();
             }//IF
             
-            if(segno == '-' && (x<=220 && x>=170) && (y<=140 && y>=100)){
-             
-              if(rsa) {
+            if(segno == '-' && (x<=220 && x>=170) && (y<=140 && y>=100)){ //PUBLISH "X"
+              if(rsa) {                                                   //IF rsa encrypte 
                 String encS = encrypte('X');
                 char encC[encS.length()+1];
                 encS.toCharArray(encC, encS.length()+1);
                 publishMessage("segno", encC);
               }//IF
-              else publishMessage("segno", "X"); //ELSE
+              else publishMessage("segno", "X"); //ELSE                   //if !RSA do not encrypte 
               
               msgIn="";
               segno = 'X';
