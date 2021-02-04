@@ -901,12 +901,12 @@ void callback(char topic[], byte payload[], unsigned int l) {
   msgIn = "";
   for (int i = 0; i < l; i++) 
     msgIn = msgIn + ((char)payload[i]); 
- }
+ }//callback
 
 
 void publishMessage(char topic[], char msg[]){ 
   client.publish(topic, msg); 
-}
+}//publishMessage
 
 void reconnectMqtt(char topic[]) {
   while (!client.connected()) { 
@@ -915,11 +915,11 @@ void reconnectMqtt(char topic[]) {
     }else
       delay(5000);
   }
-}
+}//reconnectMqtt
 
 void subscribeMessage(char topic[]){ 
   client.subscribe(topic); 
-}
+}//subscribeMessage
 
 void emptyMatrix(){
   for(int i = 0; i<3; ++i)
